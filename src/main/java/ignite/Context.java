@@ -30,10 +30,12 @@ public class Context {
 
         CacheConfiguration cacheConfiguration = new CacheConfiguration();
         cacheConfiguration.setName("persons__cache");
+
         cacheConfiguration.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
 
-//        cacheConfiguration.setCacheStoreFactory(
-//                new FactoryBuilder.SingletonFactory<>(new CacheJdbcClientStore()));
+        cacheConfiguration.setWriteThrough(true);
+        cacheConfiguration.setCacheStoreFactory(
+                new FactoryBuilder.SingletonFactory<>(new CacheJdbcClientStore()));
 
         configuration.setCacheConfiguration(cacheConfiguration);
 

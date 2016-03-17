@@ -59,7 +59,7 @@ public class CacheController {
                 TransactionIsolation.SERIALIZABLE);
 
         Person person = cache.get(1L);
-        person.setBalance(12000L);
+        person.setBalance(199000L);
 
         cache.put(person.getId(), person);
 
