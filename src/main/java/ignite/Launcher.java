@@ -4,7 +4,7 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.events.Event;
+import org.apache.ignite.events.DiscoveryEvent;
 import org.apache.ignite.events.EventType;
 import org.apache.ignite.lang.IgnitePredicate;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -36,7 +36,7 @@ public class Launcher {
 
         final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
 
-        ignite.events().localListen((IgnitePredicate<Event>) event -> {
+        ignite.events().localListen((IgnitePredicate<DiscoveryEvent>) event -> {
             if (ignite.cluster().nodes().size() >= 3) {
                 Collection<Person> persons = jdbcTemplate.query("select * from persons", (rs, rowNum) -> {
                     Person person = new Person();

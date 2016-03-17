@@ -24,6 +24,8 @@ public class CacheController {
         List<Person> people = new ArrayList<>(cache.size());
         cache.forEach(e -> people.add(e.getValue()));
 
+        ignite.compute().broadcast(new GetDataJob());
+
         return people;
     }
 }
