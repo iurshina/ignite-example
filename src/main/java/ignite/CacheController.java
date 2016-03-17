@@ -2,6 +2,9 @@ package ignite;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
+import org.apache.ignite.transactions.Transaction;
+import org.apache.ignite.transactions.TransactionConcurrency;
+import org.apache.ignite.transactions.TransactionIsolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,5 +30,41 @@ public class CacheController {
         ignite.compute().broadcast(new GetDataJob());
 
         return people;
+    }
+
+    @RequestMapping("/firstTransaction")
+    public Person firstTransaction() throws InterruptedException {
+        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
+
+        Transaction transaction = ignite.transactions().txStart(TransactionConcurrency.PESSIMISTIC,
+                TransactionIsolation.SERIALIZABLE);
+
+        Person person = cache.get(1L);
+        person.setBalance(11000L);
+
+        Thread.sleep(15000L);
+
+        cache.put(person.getId(), person);
+
+        transaction.commit();
+
+        return cache.get(1L);
+    }
+
+    @RequestMapping("/secondTransaction")
+    public Person secondTransaction() throws InterruptedException {
+        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
+
+        Transaction transaction = ignite.transactions().txStart(TransactionConcurrency.PESSIMISTIC,
+                TransactionIsolation.SERIALIZABLE);
+
+        Person person = cache.get(1L);
+        person.setBalance(12000L);
+
+        cache.put(person.getId(), person);
+
+        transaction.commit();
+
+        return cache.get(1L);
     }
 }

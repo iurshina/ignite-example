@@ -1,5 +1,6 @@
 package ignite;
 
+import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
@@ -29,6 +30,7 @@ public class Context {
 
         CacheConfiguration cacheConfiguration = new CacheConfiguration();
         cacheConfiguration.setName("persons__cache");
+        cacheConfiguration.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
 
 //        cacheConfiguration.setCacheStoreFactory(
 //                new FactoryBuilder.SingletonFactory<>(new CacheJdbcClientStore()));
