@@ -1,19 +1,16 @@
 package ignite;
 
-import org.apache.ignite.cache.affinity.AffinityKeyMapped;
-
 public class Person {
 
-    @AffinityKeyMapped
-    private long id;
+    private PersonKey id;
     private long balance;
-    private long type;
+    private long departmentType;
 
-    public long getId() {
+    public PersonKey getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(PersonKey id) {
         this.id = id;
     }
 
@@ -25,11 +22,11 @@ public class Person {
         this.balance = balance;
     }
 
-    public long getType() {
-        return type;
+    public long getDepartmentType() {
+        return departmentType;
     }
 
-    public void setType(long type) {
-        this.type = type;
+    public void setDepartmentType(long departmentType) {
+        this.departmentType = departmentType;
     }
 }

@@ -36,21 +36,31 @@ public class Launcher {
 
         Ignite ignite = Ignition.start(igniteConfiguration);
 
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+        final IgniteCache<PersonKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+        final IgniteCache<Long, Department> departmentCache = ignite.getOrCreateCache("dep_cache");
 
         ignite.events().localListen((IgnitePredicate<DiscoveryEvent>) event -> {
             if (ignite.cluster().nodes().size() >= 3) {
                 Collection<Person> persons = jdbcTemplate.query("select * from persons", (rs, rowNum) -> {
                     Person person = new Person();
 
-                    person.setId(rs.getLong(1));
+                    long depType = rs.getLong(3);
+                    long id = rs.getLong(1);
+
+                    person.setId(new PersonKey(id, depType));
                     person.setBalance(rs.getLong(2));
-                    person.setType(rs.getLong(3));
+                    person.setDepartmentType(depType);
 
                     return person;
                 });
 
+                System.out.println();
+
                 persons.stream().forEach(e -> cache.put(e.getId(), e));
+
+                departmentCache.put(1L, new Department(1));
+                departmentCache.put(2L, new Department(2));
+                departmentCache.put(3L, new Department(3));
             }
 
             return true;

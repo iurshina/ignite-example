@@ -27,14 +27,17 @@ public class CacheLoader implements LifecycleBean {
     @Override
     public void onLifecycleEvent(LifecycleEventType lifecycleEventType) throws IgniteException {
         if (lifecycleEventType == LifecycleEventType.AFTER_NODE_START) {
-            final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+            final IgniteCache<PersonKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
             Collection<Person> persons = jdbcTemplate.query("select * from persons", (rs, rowNum) -> {
                 Person person = new Person();
 
-                person.setId(rs.getLong(1));
+                long id = rs.getLong(1);
+                long type = rs.getLong(3);
+
+                person.setId(new PersonKey(id, type));
                 person.setBalance(rs.getLong(2));
-                person.setType(rs.getLong(3));
+                person.setDepartmentType(rs.getLong(3));
 
                 return person;
             });

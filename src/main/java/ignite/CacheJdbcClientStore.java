@@ -12,7 +12,7 @@ import javax.cache.integration.CacheWriterException;
 import java.io.Serializable;
 import java.sql.*;
 
-public class CacheJdbcClientStore extends CacheStoreAdapter<Long, Person> implements Serializable {
+public class CacheJdbcClientStore extends CacheStoreAdapter<PersonKey, Person> implements Serializable {
 
     @IgniteInstanceResource
     private transient Ignite ignite;
@@ -24,20 +24,20 @@ public class CacheJdbcClientStore extends CacheStoreAdapter<Long, Person> implem
     }
 
     @Override
-    public Person load(Long aLong) throws CacheLoaderException {
+    public Person load(PersonKey aLong) throws CacheLoaderException {
         return null;
     }
 
     @Override
-    public void write(Cache.Entry<? extends Long, ? extends Person> entry) throws CacheWriterException {
+    public void write(Cache.Entry<? extends PersonKey, ? extends Person> entry) throws CacheWriterException {
         try (Connection conn = connection()) {
             try (PreparedStatement st = conn.prepareStatement(
                     "merge into PERSONS (id, balance, type) key (id) VALUES (?, ?, ?)")) {
                 Person val = entry.getValue();
 
-                st.setLong(1, entry.getKey());
+                st.setLong(1, entry.getKey().getId());
                 st.setLong(2, val.getBalance());
-                st.setLong(3, val.getType());
+                st.setLong(3, val.getDepartmentType());
 
                 st.executeUpdate();
             }

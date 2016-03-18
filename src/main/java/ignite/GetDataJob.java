@@ -20,12 +20,23 @@ public class GetDataJob implements IgniteCallable<Collection<Person>> {
 
     @Override
     public Collection<Person> call() throws Exception {
-        IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+        IgniteCache<PersonKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+        IgniteCache<Long, Department> depCache = ignite.getOrCreateCache("dep_cache");
 
         List<String> ids = new ArrayList<>();
-        cache.localEntries(CachePeekMode.ALL).forEach(e -> ids.add(String.valueOf(e.getKey())));
+        List<String> types = new ArrayList<>();
+        cache.localEntries(CachePeekMode.ALL).forEach(e -> {
+            ids.add(String.valueOf(e.getKey()));
+            types.add(String.valueOf(e.getValue().getDepartmentType()));
+        });
 
-        System.out.println("Entities on the node: size: " + cache.localSize() + ", ids: " + String.join(", ", ids));
+        List<String> deps = new ArrayList<>();
+        depCache.localEntries(CachePeekMode.ALL).forEach(longDepartmentEntry -> {
+            deps.add(String.valueOf(longDepartmentEntry.getValue().getDepartmentType()));
+        });
+
+        System.out.println("Entities on the node: size: " + cache.localSize() + ", ids: " + String.join(", ", ids) +
+        ", types: " +  String.join(", ", types) + ", deps:" + String.join(", ", deps));
 
         return Collections.emptyList();
     }

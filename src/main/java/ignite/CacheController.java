@@ -24,7 +24,7 @@ public class CacheController {
 
     @RequestMapping("/getAll")
     public List<Person> getAll() {
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+        final IgniteCache<PersonKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
         List<Person> people = new ArrayList<>(cache.size());
         cache.forEach(e -> people.add(e.getValue()));
@@ -36,12 +36,12 @@ public class CacheController {
 
     @RequestMapping("/firstTransaction")
     public Person firstTransaction() throws InterruptedException {
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+        final IgniteCache<PersonKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
         Transaction transaction = ignite.transactions().txStart(TransactionConcurrency.PESSIMISTIC,
                 TransactionIsolation.SERIALIZABLE);
 
-        Person person = cache.get(1L);
+        Person person = cache.get(new PersonKey(1L, 1));
         person.setBalance(11000L);
 
         Thread.sleep(15000L);
@@ -50,12 +50,12 @@ public class CacheController {
 
         transaction.commit();
 
-        return cache.get(1L);
+        return cache.get(new PersonKey(1L, 1));
     }
 
     @RequestMapping("/secondTransaction")
     public Person secondTransaction() throws InterruptedException {
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+        final IgniteCache<PersonKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
         Transaction transaction = ignite.transactions().txStart(TransactionConcurrency.PESSIMISTIC,
                 TransactionIsolation.SERIALIZABLE);
@@ -68,8 +68,8 @@ public class CacheController {
         ignite.compute().affinityRun(CACHE_NAME, 1L, () -> System.out.println("AffirnityRun"));
 
         ignite.compute().affinityRun(CACHE_NAME, 1L, () -> {
-            Person person = cache.get(1L);
-            person.setBalance(199000L);
+            Person person = cache.get(new PersonKey(2L, 2));
+            person.setBalance(12000L);
 
             cache.put(person.getId(), person);
             System.out.println("Affinity run: data changed");
@@ -77,6 +77,6 @@ public class CacheController {
 
         transaction.commit();
 
-        return cache.get(1L);
+        return cache.get(new PersonKey(2L, 2));
     }
 }
