@@ -22,6 +22,8 @@ import java.util.Collection;
 @Import(Context.class)
 public class Launcher {
 
+    public static final String CACHE_NAME = "persons__cache";
+
     private JdbcTemplate jdbcTemplate;
 
     public static void main(String[] args) {
@@ -34,7 +36,7 @@ public class Launcher {
 
         Ignite ignite = Ignition.start(igniteConfiguration);
 
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
+        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
         ignite.events().localListen((IgnitePredicate<DiscoveryEvent>) event -> {
             if (ignite.cluster().nodes().size() >= 3) {

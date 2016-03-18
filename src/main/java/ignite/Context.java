@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import javax.cache.configuration.FactoryBuilder;
 import java.util.Arrays;
 
+import static ignite.Launcher.CACHE_NAME;
+
 @Configuration
 public class Context {
 
@@ -29,7 +31,7 @@ public class Context {
         configuration.setPeerClassLoadingEnabled(true);
 
         CacheConfiguration cacheConfiguration = new CacheConfiguration();
-        cacheConfiguration.setName("persons__cache");
+        cacheConfiguration.setName(CACHE_NAME);
 
         cacheConfiguration.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
 

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ignite.Launcher.*;
+
 @RestController
 @RequestMapping(path = "/api", method = RequestMethod.GET)
 public class CacheController {
@@ -22,7 +24,7 @@ public class CacheController {
 
     @RequestMapping("/getAll")
     public List<Person> getAll() {
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
+        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
         List<Person> people = new ArrayList<>(cache.size());
         cache.forEach(e -> people.add(e.getValue()));
@@ -34,7 +36,7 @@ public class CacheController {
 
     @RequestMapping("/firstTransaction")
     public Person firstTransaction() throws InterruptedException {
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
+        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
         Transaction transaction = ignite.transactions().txStart(TransactionConcurrency.PESSIMISTIC,
                 TransactionIsolation.SERIALIZABLE);
@@ -53,15 +55,25 @@ public class CacheController {
 
     @RequestMapping("/secondTransaction")
     public Person secondTransaction() throws InterruptedException {
-        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
+        final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
         Transaction transaction = ignite.transactions().txStart(TransactionConcurrency.PESSIMISTIC,
                 TransactionIsolation.SERIALIZABLE);
 
-        Person person = cache.get(1L);
-        person.setBalance(199000L);
+//        Person person = cache.get(1L);
+//        person.setBalance(199000L);
+//
+//        cache.put(person.getId(), person);
 
-        cache.put(person.getId(), person);
+        ignite.compute().affinityRun(CACHE_NAME, 1L, () -> System.out.println("AffirnityRun"));
+
+        ignite.compute().affinityRun(CACHE_NAME, 1L, () -> {
+            Person person = cache.get(1L);
+            person.setBalance(199000L);
+
+            cache.put(person.getId(), person);
+            System.out.println("Affinity run: data changed");
+        });
 
         transaction.commit();
 

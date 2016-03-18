@@ -11,6 +11,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Collection;
 
+import static ignite.Launcher.CACHE_NAME;
+
 public class CacheLoader implements LifecycleBean {
 
     @IgniteInstanceResource
@@ -25,7 +27,7 @@ public class CacheLoader implements LifecycleBean {
     @Override
     public void onLifecycleEvent(LifecycleEventType lifecycleEventType) throws IgniteException {
         if (lifecycleEventType == LifecycleEventType.AFTER_NODE_START) {
-            final IgniteCache<Long, Person> cache = ignite.getOrCreateCache("persons__cache");
+            final IgniteCache<Long, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
 
             Collection<Person> persons = jdbcTemplate.query("select * from persons", (rs, rowNum) -> {
                 Person person = new Person();

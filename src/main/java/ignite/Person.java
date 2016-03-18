@@ -1,7 +1,10 @@
 package ignite;
 
+import org.apache.ignite.cache.affinity.AffinityKeyMapped;
+
 public class Person {
 
+    @AffinityKeyMapped
     private long id;
     private long balance;
     private long type;
