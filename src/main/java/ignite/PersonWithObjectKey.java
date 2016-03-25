@@ -1,16 +1,16 @@
 package ignite;
 
-public class Person {
+public class PersonWithObjectKey {
 
-    private long id;
+    private PersonKey id;
     private long balance;
     private long departmentType;
 
-    public long getId() {
+    public PersonKey getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(PersonKey id) {
         this.id = id;
     }
 

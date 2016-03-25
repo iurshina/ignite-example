@@ -3,6 +3,7 @@ package ignite;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.cache.affinity.AffinityKey;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.events.DiscoveryEvent;
 import org.apache.ignite.events.EventType;
@@ -18,7 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.Collection;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"ignite"})
+@ComponentScan(basePackages = {"ignite", "cassandra"})
 @Import(Context.class)
 public class Launcher {
 
@@ -36,8 +37,8 @@ public class Launcher {
 
         Ignite ignite = Ignition.start(igniteConfiguration);
 
-        final IgniteCache<PersonKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
-        final IgniteCache<Long, Department> departmentCache = ignite.getOrCreateCache("dep_cache");
+        final IgniteCache<AffinityKey, Person> cache = ignite.getOrCreateCache(CACHE_NAME);
+//        final IgniteCache<Long, Department> departmentCache = ignite.getOrCreateCache("dep_cache");
 
         ignite.events().localListen((IgnitePredicate<DiscoveryEvent>) event -> {
             if (ignite.cluster().nodes().size() >= 3) {
@@ -47,7 +48,7 @@ public class Launcher {
                     long depType = rs.getLong(3);
                     long id = rs.getLong(1);
 
-                    person.setId(new PersonKey(id, depType));
+                    person.setId(id);
                     person.setBalance(rs.getLong(2));
                     person.setDepartmentType(depType);
 
@@ -56,11 +57,11 @@ public class Launcher {
 
                 System.out.println();
 
-                persons.stream().forEach(e -> cache.put(e.getId(), e));
+                persons.stream().forEach(e -> cache.put(new AffinityKey(e.getId(), e.getDepartmentType()), e));
 
-                departmentCache.put(1L, new Department(1));
-                departmentCache.put(2L, new Department(2));
-                departmentCache.put(3L, new Department(3));
+//                departmentCache.put(1L, new Department(1));
+//                departmentCache.put(2L, new Department(2));
+//                departmentCache.put(3L, new Department(3));
             }
 
             return true;

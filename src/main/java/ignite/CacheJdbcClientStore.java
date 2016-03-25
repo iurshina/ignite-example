@@ -1,6 +1,7 @@
 package ignite;
 
 import org.apache.ignite.Ignite;
+import org.apache.ignite.cache.affinity.AffinityKey;
 import org.apache.ignite.cache.store.CacheStoreAdapter;
 import org.apache.ignite.resources.IgniteInstanceResource;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -12,7 +13,7 @@ import javax.cache.integration.CacheWriterException;
 import java.io.Serializable;
 import java.sql.*;
 
-public class CacheJdbcClientStore extends CacheStoreAdapter<PersonKey, Person> implements Serializable {
+public class CacheJdbcClientStore extends CacheStoreAdapter<AffinityKey, Person> implements Serializable {
 
     @IgniteInstanceResource
     private transient Ignite ignite;
@@ -24,18 +25,18 @@ public class CacheJdbcClientStore extends CacheStoreAdapter<PersonKey, Person> i
     }
 
     @Override
-    public Person load(PersonKey aLong) throws CacheLoaderException {
+    public Person load(AffinityKey aLong) throws CacheLoaderException {
         return null;
     }
 
     @Override
-    public void write(Cache.Entry<? extends PersonKey, ? extends Person> entry) throws CacheWriterException {
+    public void write(Cache.Entry<? extends AffinityKey, ? extends Person> entry) throws CacheWriterException {
         try (Connection conn = connection()) {
             try (PreparedStatement st = conn.prepareStatement(
                     "merge into PERSONS (id, balance, type) key (id) VALUES (?, ?, ?)")) {
                 Person val = entry.getValue();
 
-                st.setLong(1, entry.getKey().getId());
+                st.setLong(1, (Long) entry.getKey().key());
                 st.setLong(2, val.getBalance());
                 st.setLong(3, val.getDepartmentType());
 
